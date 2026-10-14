@@ -6,6 +6,13 @@
 	"observability": {
 		"enabled": true
 	},
+	"rules": [
+		{
+			"type": "Text",
+			"globs": ["**/*.conf"],
+			"fallthrough": true
+		}
+	],
 	"compatibility_flags": [
 		"nodejs_compat"
 	],

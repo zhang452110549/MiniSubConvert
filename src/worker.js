@@ -1,5 +1,5 @@
 import { ProxyUtils } from "@/core/proxy-utils";
-import { fetchSubscriptions } from "@/utils/subscription";
+import { convertSubscriptions } from "@/core/convert";
 
 export default {
     async fetch(request, env) {
@@ -54,11 +54,14 @@ export class MiniSubConvert {
                 }
 
                 const client = target;
-                const proxies = (await fetchSubscriptions(rawUrls, searchParams.get("ua"))).flatMap((subContent) =>
-                    ProxyUtils.parse(subContent),
-                );
-                const result = ProxyUtils.produce(proxies, client);
-                console.log(`parsed ${proxies.length} nodes, target client: ${client || "-"}`);
+                const { result, count } = await convertSubscriptions({
+                    rawUrls,
+                    target: client,
+                    userAgent: searchParams.get("ua"),
+                    config: searchParams.get("config") === "1",
+                    managedUrl: request.url,
+                });
+                console.log(`parsed ${count} nodes, target client: ${client || "-"}`);
 
                 return new Response(result, {
                     status: 200,

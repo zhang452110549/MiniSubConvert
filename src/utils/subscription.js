@@ -14,7 +14,7 @@ export async function fetchSubscriptions(rawUrls, userAgent) {
                 if (!response.ok) {
                     throw new Error(`fetch subscription failed: HTTP ${response.status} ${new URL(subscribeUrl).host}`);
                 }
-                return response.text();
+                return { url: subscribeUrl, content: await response.text() };
             }),
     );
 }

@@ -1,6 +1,6 @@
 import { createServer } from "node:http";
 import { ProxyUtils } from "@/core/proxy-utils";
-import { fetchSubscriptions } from "@/utils/subscription";
+import { convertSubscriptions } from "@/core/convert";
 
 createServer(async (req, res) => {
     const method = (req.method || "").toUpperCase();
@@ -43,14 +43,19 @@ createServer(async (req, res) => {
             return;
         }
 
-        const proxies = (await fetchSubscriptions(rawUrls, url.searchParams.get("ua"))).flatMap((subContent) =>
-            ProxyUtils.parse(subContent),
-        );
-        const result = ProxyUtils.produce(proxies, target);
+        const proto = (req.headers["x-forwarded-proto"] || "http").toString().split(",")[0].trim();
+        const host = (req.headers["x-forwarded-host"] || req.headers.host || "").toString().split(",")[0].trim();
+        const { result, count } = await convertSubscriptions({
+            rawUrls,
+            target,
+            userAgent: url.searchParams.get("ua"),
+            config: url.searchParams.get("config") === "1",
+            managedUrl: host ? `${proto}://${host}${route}` : "",
+        });
 
         res.writeHead(200, { "Content-Type": "text/plain; charset=utf-8" });
         res.end(result);
-        log("200", `parsed ${proxies.length} nodes, target client: ${target || "-"}`);
+        log("200", `parsed ${count} nodes, target client: ${target || "-"}`);
     } catch (e) {
         res.writeHead(500, { "Content-Type": "text/plain; charset=utf-8" });
         res.end(String(e?.message || e));

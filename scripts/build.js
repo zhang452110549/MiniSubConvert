@@ -209,6 +209,7 @@ async function buildBundle(entryPath, outputPath, banner) {
         sourcemap: false,
         banner: banner ? { js: banner } : undefined,
         tsconfig: PATHS.buildTsconfigPath,
+        loader: { '.conf': 'text' },
         logLevel: 'info',
     });
 }
