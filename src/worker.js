@@ -1,4 +1,5 @@
 import { ProxyUtils } from "@/core/proxy-utils";
+import { fetchSubscriptions } from "@/utils/subscription";
 
 export default {
     async fetch(request, env) {
@@ -53,15 +54,9 @@ export class MiniSubConvert {
                 }
 
                 const client = target;
-                const proxies = (
-                    await Promise.all(
-                        rawUrls
-                            .split("|")
-                            .map((item) => item.trim())
-                            .filter(Boolean)
-                            .map((subscribeUrl) => fetch(subscribeUrl).then((response) => response.text())),
-                    )
-                ).flatMap((subContent) => ProxyUtils.parse(subContent));
+                const proxies = (await fetchSubscriptions(rawUrls, searchParams.get("ua"))).flatMap((subContent) =>
+                    ProxyUtils.parse(subContent),
+                );
                 const result = ProxyUtils.produce(proxies, client);
                 console.log(`parsed ${proxies.length} nodes, target client: ${client || "-"}`);
 
@@ -72,8 +67,12 @@ export class MiniSubConvert {
             }
 
             return new Response(null, { status: 403 });
-        } catch {
-            return new Response(null, { status: 500 });
+        } catch (e) {
+            console.error(e);
+            return new Response(String(e?.message || e), {
+                status: 500,
+                headers: { "Content-Type": "text/plain; charset=utf-8" },
+            });
         }
     }
 }

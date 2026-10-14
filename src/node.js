@@ -1,5 +1,6 @@
 import { createServer } from "node:http";
 import { ProxyUtils } from "@/core/proxy-utils";
+import { fetchSubscriptions } from "@/utils/subscription";
 
 createServer(async (req, res) => {
     const method = (req.method || "").toUpperCase();
@@ -42,24 +43,18 @@ createServer(async (req, res) => {
             return;
         }
 
-        const proxies = (
-            await Promise.all(
-                rawUrls
-                    .split("|")
-                    .map((item) => item.trim())
-                    .filter(Boolean)
-                    .map((subscribeUrl) => fetch(subscribeUrl).then((response) => response.text())),
-            )
-        ).flatMap((subContent) => ProxyUtils.parse(subContent));
+        const proxies = (await fetchSubscriptions(rawUrls, url.searchParams.get("ua"))).flatMap((subContent) =>
+            ProxyUtils.parse(subContent),
+        );
         const result = ProxyUtils.produce(proxies, target);
 
         res.writeHead(200, { "Content-Type": "text/plain; charset=utf-8" });
         res.end(result);
         log("200", `parsed ${proxies.length} nodes, target client: ${target || "-"}`);
-    } catch {
-        res.writeHead(500);
-        res.end();
-        log("500");
+    } catch (e) {
+        res.writeHead(500, { "Content-Type": "text/plain; charset=utf-8" });
+        res.end(String(e?.message || e));
+        log("500", String(e?.message || e));
     }
 }).listen(Number(process.env.PORT) || 3000, process.env.HOST || "0.0.0.0", () => {
     console.log(`Server is running at http://${process.env.HOST || "0.0.0.0"}:${Number(process.env.PORT) || 3000}`);

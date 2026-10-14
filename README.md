@@ -51,6 +51,7 @@ GET <WORKER_DOMAIN>/<SECRET>/sub?target=<TARGET>&url=<URLS>
 - **url**: 原始订阅链接。
     - **多订阅合并**：如果需要合并多个订阅，请使用竖线 `|` 分隔链接。
     - **URL 编码**：最终拼接后的字符串必须进行 **URL Encode** 编码。
+- **ua**（可选）：拉取订阅时使用的 User-Agent，默认 `FlClash/v0.9.0 clash-verge Platform/macos`。部分机场按 UA 下发不同格式的配置，拉取结果为空时可尝试调整。
 
 请求示例 
 
