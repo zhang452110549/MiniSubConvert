@@ -54,6 +54,7 @@ GET <WORKER_DOMAIN>/<SECRET>/sub?target=<TARGET>&url=<URLS>
 - **config**（可选，仅 Surge）：设为 `1` 时按 [`src/templates/surge.conf`](src/templates/surge.conf) 模板输出完整的 Surge 配置（带 `#!MANAGED-CONFIG` 以便自动更新）；不传时只返回节点列表，可用于 `policy-path`。
     - 每个订阅生成一个节点池策略组，组名取订阅地址的 `#` 片段（如 `https://example.com/sub1#机场A`），未设置时使用订阅域名。
     - 订阅地址的域名 / IP 会自动加入直连规则；多个订阅中的重名节点会自动追加序号。
+- **filename**（可选）：通过 `Content-Disposition` 响应头指定配置文件名，客户端从 URL 安装配置时以此命名。`config=1` 输出 Surge 配置时默认为 `MiniSubConvert`（Surge Mac 从 URL 安装时缺少文件名会安装失败）。
 - **ua**（可选）：拉取订阅时使用的 User-Agent，默认 `FlClash/v0.9.0 clash-verge Platform/macos`。部分机场按 UA 下发不同格式的配置，拉取结果为空时可尝试调整。
 
 请求示例 

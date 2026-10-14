@@ -45,15 +45,16 @@ createServer(async (req, res) => {
 
         const proto = (req.headers["x-forwarded-proto"] || "http").toString().split(",")[0].trim();
         const host = (req.headers["x-forwarded-host"] || req.headers.host || "").toString().split(",")[0].trim();
-        const { result, count } = await convertSubscriptions({
+        const { result, count, headers } = await convertSubscriptions({
             rawUrls,
             target,
             userAgent: url.searchParams.get("ua"),
             config: url.searchParams.get("config") === "1",
             managedUrl: host ? `${proto}://${host}${route}` : "",
+            filename: url.searchParams.get("filename"),
         });
 
-        res.writeHead(200, { "Content-Type": "text/plain; charset=utf-8" });
+        res.writeHead(200, headers);
         res.end(result);
         log("200", `parsed ${count} nodes, target client: ${target || "-"}`);
     } catch (e) {

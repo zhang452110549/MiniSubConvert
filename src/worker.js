@@ -54,19 +54,17 @@ export class MiniSubConvert {
                 }
 
                 const client = target;
-                const { result, count } = await convertSubscriptions({
+                const { result, count, headers } = await convertSubscriptions({
                     rawUrls,
                     target: client,
                     userAgent: searchParams.get("ua"),
                     config: searchParams.get("config") === "1",
                     managedUrl: request.url,
+                    filename: searchParams.get("filename"),
                 });
                 console.log(`parsed ${count} nodes, target client: ${client || "-"}`);
 
-                return new Response(result, {
-                    status: 200,
-                    headers: { "Content-Type": "text/plain; charset=utf-8" },
-                });
+                return new Response(result, { status: 200, headers });
             }
 
             return new Response(null, { status: 403 });
